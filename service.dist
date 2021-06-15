@@ -4,15 +4,15 @@ After=network.target
 
 [Service]
 Type=simple
-User=bitwarden
-ExecStart=/usr/local/bin/bitwarden_rs
+User=@@SERVICEUSER@@
+ExecStart=/usr/local/bin/@@EXECUTABLENAME@@
 PrivateTmp=true
 PrivateDevices=true
 ProtectHome=true
 ProtectSystem=strict
-WorkingDirectory=/etc/bitwarden_rs
-ReadWriteDirectories=/var/lib/bitwarden_rs
-EnvironmentFile=/etc/bitwarden_rs/config.env
+WorkingDirectory=/etc/@@PACKAGEDIR@@
+ReadWriteDirectories=/var/lib/@@PACKAGEDIR@@
+EnvironmentFile=/etc/@@PACKAGEDIR@@/config.env
 
 [Install]
 WantedBy=multi-user.target
