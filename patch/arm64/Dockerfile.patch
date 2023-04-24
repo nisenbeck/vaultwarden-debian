@@ -1,0 +1,31 @@
+diff --git a/docker/arm64/Dockerfile b/docker/arm64/Dockerfile
+index 117517a..2c82058 100644
+--- a/docker/arm64/Dockerfile
++++ b/docker/arm64/Dockerfile
+@@ -96,6 +96,26 @@ RUN touch src/main.rs
+ # your actual source files being built
+ RUN cargo build --features ${DB} --release --target=aarch64-unknown-linux-gnu
+ 
++####################### dpkg target ##########################
++FROM build as dpkg
++RUN mkdir /outdir
++RUN mkdir -p /vaultwarden_package/DEBIAN
++RUN mkdir -p /vaultwarden_package/usr/local/bin
++RUN mkdir -p /vaultwarden_package/usr/lib/systemd/system
++RUN mkdir -p /vaultwarden_package/etc/@@PACKAGEDIR@@
++RUN mkdir -p /vaultwarden_package/usr/share/@@PACKAGEDIR@@
++
++WORKDIR /vaultwarden_package
++COPY debian/control /vaultwarden_package/DEBIAN/control
++COPY debian/postinst /vaultwarden_package/DEBIAN/postinst
++COPY debian/conffiles /vaultwarden_package/DEBIAN/conffiles
++COPY debian/config.env /vaultwarden_package/etc/@@PACKAGEDIR@@
++COPY debian/@@EXECUTABLENAME@@.service /vaultwarden_package/usr/lib/systemd/system
++COPY --from=vault /web-vault /vaultwarden_package/usr/share/@@PACKAGEDIR@@/web-vault
++COPY --from=build app/target/aarch64-unknown-linux-gnu/release/vaultwarden /vaultwarden_package/usr/local/bin/@@EXECUTABLENAME@@
++
++RUN dpkg-deb --build . /outdir/@@PACKAGEDIR@@.deb
++
+ ######################## RUNTIME IMAGE  ########################
+ # Create a new stage with a minimal image
+ # because we already have a binary built

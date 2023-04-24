@@ -38,7 +38,7 @@ while getopts ":r:o:d:a:p:i:u:e:" opt; do
 done
 if [ -z "$REF" ]; then REF=$(curl -s https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 1-); fi
 ARCH=$ARCH_DIR
-if [[ "$ARCH" =~ ^arm ]]; then ARCH="armhf"; fi
+if [[ "$ARCH" =~ ^arm7 ]]; then ARCH="armhf"; fi
 
 # Clone vaultwarden
 if [ ! -d "$SRC" ]; then
@@ -94,7 +94,7 @@ sed -E "s/(FROM[[:space:]]*debian:)[^-]+(-.+)/\1${OS_VERSION_NAME}\2/g" -i "$DIR
 CONTROL="$DEBIANDIR/control"
 cp "$DIR/control.dist" "$CONTROL"
 sed -i "s/@@PACKAGENAME@@/$PACKAGENAME/g" "$CONTROL"
-sed -i "s/Version:.*/Version: $REF-1/" "$CONTROL"
+sed -i "s/Version:.*/Version: $REF-1-$OS_VERSION_NAME/" "$CONTROL"
 sed -i "s/Architecture:.*/Architecture: $ARCH/" "$CONTROL"
 
 # Prepare Systemd-unit

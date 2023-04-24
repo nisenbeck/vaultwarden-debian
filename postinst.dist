@@ -1,4 +1,10 @@
 #!/bin/sh
+if [ -f /etc/@@PACKAGEDIR@@/Rocket.toml ]
+then
+       mv /etc/@@PACKAGEDIR@@/Rocket.toml /etc/@@PACKAGEDIR@@/Rocket.toml.deprecated
+fi
 DIR_MODE=0700 adduser --system --group --home /var/lib/@@PACKAGEDIR@@ @@SERVICEUSER@@
 chmod 700 /var/lib/@@PACKAGEDIR@@
 chmod 600 /etc/@@PACKAGEDIR@@/config.env
+systemctl daemon-reload
+systemctl restart vaultwarden.service
