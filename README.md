@@ -11,11 +11,16 @@ Make sure you have the required build dependencies:
 * git
 * patch
 * curl
+* apparmor
+
+```
+apt install docker.io git patch curl apparmor
+```
 
 Then:
 
 ```
-git clone https://github.com/greizgh/vaultwarden-debian.git
+git clone https://github.com/nisenbeck/vaultwarden-debian.git
 cd vaultwarden-debian
 ./build.sh -r <version> # target vaultwarden version, example 1.19.0
 ```
@@ -23,7 +28,7 @@ cd vaultwarden-debian
 The `build.sh` script will build vaultwarden for the same Debian version which targets vaultwarden.
 That means, to build vaultwarden v1.19.0, make sure to checkout tag `v1.19.0` of this project.
 
-To compile for a different Debian version, specify the release name (e.g. Buster, Bullseye) using the `-o` option. You can compile for arm32v7 or amd64 architecture using the `-a` option, only the Buster (default) release of debian is supported by arm32v7.
+To compile for a different Debian version, specify the release name (e.g. Buster, Bullseye) using the `-o` option. You can compile for arm32v7, arm64 and amd64 architecture using the `-a` option. Only the Buster (default) release of debian is supported by arm32v7.
 
 ```
 ./build.sh -o bullseye
@@ -35,7 +40,7 @@ The packaged systemd unit is **disabled**, you need to configure vaultwarden thr
 [EnvFile](https://www.freedesktop.org/software/systemd/man/systemd.service.html#Command%20lines):
 `/etc/vaultwarden/config.env`
 
-You will also probably want to setup a reverse proxy.
+You will also probably want to setup a reverse proxy. See [webserver](./webserver) for examples.
 
 
 ## License
