@@ -7,14 +7,18 @@ This repository will help you produce a debian package.
 ## TL;DR
 
 Make sure you have the required build dependencies:
-* docker
-* git
-* patch
-* curl
-* apparmor
-
 ```
-apt install docker.io git patch curl apparmor
+apt-get update
+apt-get install git curl gnupg ca-certificates apparmor build-essential patch sudo psmisc
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 Then:
@@ -28,7 +32,7 @@ cd vaultwarden-debian
 The `build.sh` script will build vaultwarden for the same Debian version which targets vaultwarden.
 That means, to build vaultwarden v1.19.0, make sure to checkout tag `v1.19.0` of this project.
 
-To compile for a different Debian version, specify the release name (e.g. Buster, Bullseye) using the `-o` option. You can compile for arm32v7, arm64 and amd64 architecture using the `-a` option. Only the Buster (default) release of debian is supported by arm32v7.
+To compile for a different Debian version, specify the release name (e.g. buster, bullseye, bookworm) using the `-o` option. You can compile for amd64 or arm64 architecture using the `-a` option.
 
 ```
 ./build.sh -o bullseye
