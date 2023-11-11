@@ -41,7 +41,6 @@ while getopts ":r:o:d:a:p:i:u:e:s" opt; do
 done
 if [ -z "$REF" ]; then REF=$(curl -s https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 1-); fi
 ARCH=$ARCH_DIR
-if [[ "$ARCH" =~ ^arm ]]; then ARCH="armhf"; fi
 
 VAULTWARDEN_DEPS="libc6, libgcc-s1"
 
