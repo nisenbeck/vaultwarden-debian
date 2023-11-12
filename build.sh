@@ -123,7 +123,7 @@ CONTROL="$DEBIANDIR/control"
 cp "$DIR/control.dist" "$CONTROL"
 sed -i "s/@@PACKAGENAME@@/$PACKAGENAME/g" "$CONTROL"
 sed -i "s/@@VAULTWARDEN_DEPS@@/$VAULTWARDEN_DEPS/g" "$CONTROL"
-sed -i "s/Version:.*/Version: $REF-1/" "$CONTROL"
+sed -i "s/Version:.*/Version: $REF-1-$OS_VERSION_NAME/" "$CONTROL"
 sed -i "s/Architecture:.*/Architecture: $ARCH/" "$CONTROL"
 if [ -n "$RECOMMENDS" ]; then
   echo "Recommends: $RECOMMENDS" >> "$CONTROL"
@@ -146,7 +146,7 @@ chmod 644 "$DEBIANDIR/sysusers.conf"
 sed tmpfiles.conf > "$DEBIANDIR/tmpfiles.conf" -f <( echo "$SEDCOMMANDS" ) || exit
 chmod 644 "$DEBIANDIR/tmpfiles.conf"
 
-echo "[INFO] docker build -t vaultwarden-deb $DIR --build-arg DB=$DB_TYPE"
+echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$DB_TYPE"
 docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$DB_TYPE" --target dpkg -f "$DIR/Dockerfile"
 
 CID=$(docker run -d vaultwarden-deb)
