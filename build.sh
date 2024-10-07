@@ -74,6 +74,7 @@ popd || exit
 
 DEBIANDIR="$SRC/debian"
 mkdir -p "$DEBIANDIR"
+echo "!debian" >> "$SRC/.dockerignore"
 
 SEDCOMMANDS="
 s/@@PACKAGENAME@@/$PACKAGENAME/g
