@@ -116,8 +116,9 @@ sed "$DIR/patch/$ARCH_DIR/Dockerfile.patch" -f <( echo "$SEDCOMMANDS" ) | \
 patch "$SRC/docker/Dockerfile.debian" --verbose -o "$DIR/Dockerfile" || \
 exit
 
-sed "/docker.io\/library\/rust/s/bookworm/${OS_VERSION_NAME}/g" -i "$DIR/Dockerfile"
-sed "/docker.io\/library\/debian/s/bookworm/${OS_VERSION_NAME}/g" -i "$DIR/Dockerfile"
+# Replace OS version in Dockerfile (supports bookworm, trixie, bullseye, etc.)
+sed -i "s/\(rust:[0-9.]*-slim-\)[a-z]*/\1${OS_VERSION_NAME}/g" "$DIR/Dockerfile"
+sed -i "s/\(debian:\)[a-z]*-slim/\1${OS_VERSION_NAME}-slim/g" "$DIR/Dockerfile"
 
 # Prepare Controlfile
 CONTROL="$DEBIANDIR/control"
@@ -147,8 +148,18 @@ chmod 644 "$DEBIANDIR/sysusers.conf"
 sed tmpfiles.conf > "$DEBIANDIR/tmpfiles.conf" -f <( echo "$SEDCOMMANDS" ) || exit
 chmod 644 "$DEBIANDIR/tmpfiles.conf"
 
-echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$DB_TYPE"
-docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$DB_TYPE" --target dpkg -f "$DIR/Dockerfile"
+#echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$DB_TYPE"
+#docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$DB_TYPE" --target dpkg -f "$DIR/Dockerfile"
+
+CARGO_FEATURES="$DB_TYPE"
+if [ "$OS_VERSION_NAME" = "bullseye" ]; then
+    echo "[INFO] Bullseye detected - enabling vendored_openssl for OpenSSL 3 compatibility"
+    CARGO_FEATURES="$DB_TYPE,vendored_openssl"
+
+    perl -i -pe 'print "# Install build dependencies for vendored OpenSSL\nRUN apt-get update && apt-get install -y --no-install-recommends make perl && rm -rf /var/lib/apt/lists/*\n\n" if /^RUN source \/env-cargo && \\$/ && !$done++' "$DIR/Dockerfile"
+fi
+echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$CARGO_FEATURES"
+docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$CARGO_FEATURES" --target dpkg -f "$DIR/Dockerfile"
 
 CID=$(docker run -d vaultwarden-deb)
 docker cp "$CID:/outdir/${PACKAGEDIR}.deb" "$DST/${PACKAGEDIR}-${OS_VERSION_NAME}-${REF}-${DB_TYPE}-${ARCH_DIR}.deb"
