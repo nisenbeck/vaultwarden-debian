@@ -148,9 +148,6 @@ chmod 644 "$DEBIANDIR/sysusers.conf"
 sed tmpfiles.conf > "$DEBIANDIR/tmpfiles.conf" -f <( echo "$SEDCOMMANDS" ) || exit
 chmod 644 "$DEBIANDIR/tmpfiles.conf"
 
-#echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$DB_TYPE"
-#docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$DB_TYPE" --target dpkg -f "$DIR/Dockerfile"
-
 CARGO_FEATURES="$DB_TYPE"
 if [ "$OS_VERSION_NAME" = "bullseye" ]; then
     echo "[INFO] Bullseye detected - enabling vendored_openssl for OpenSSL 3 compatibility"
