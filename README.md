@@ -4,21 +4,33 @@
 
 This repository will help you produce a debian package.
 
-## TL;DR
+## TL;DR (Quickstart with vaultwarden-builder.sh)
+
+If you want a shortcut and don't want to set up everything manually, use the vaultwarden-builder.sh script:
+
+```
+wget https://raw.githubusercontent.com/nisenbeck/vaultwarden-debian/refs/heads/master/vaultwarden-builder.sh
+chmod +x vaultwarden-builder.sh
+./vaultwarden-builder.sh
+```
+
+For manual setup and full details, see below:
+
+## Manual Setup Instructions
 
 Make sure you have the required build dependencies:
 ```
 apt-get update
-apt-get install -y git curl gnupg ca-certificates apparmor build-essential patch sudo psmisc
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+apt-get install -y git curl gnupg ca-certificates apparmor build-essential patch
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
 echo \
   "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 Then:
