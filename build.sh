@@ -39,7 +39,7 @@ while getopts ":r:o:d:a:p:i:u:e:s" opt; do
     ;;
   esac
 done
-if [ -z "$REF" ]; then REF=$(curl -s https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c 1-); fi
+if [ -z "$REF" ]; then REF=$(curl -s https://api.github.com/repos/dani-garcia/vaultwarden/releases/latest | grep -oP '"tag_name":\s*"\K[^"]+'); fi
 ARCH=$ARCH_DIR
 
 VAULTWARDEN_DEPS="libc6"
