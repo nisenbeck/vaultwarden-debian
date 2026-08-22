@@ -153,7 +153,7 @@ if [ "$OS_VERSION_NAME" = "bullseye" ]; then
     echo "[INFO] Bullseye detected - enabling vendored_openssl for OpenSSL 3 compatibility"
     CARGO_FEATURES="$DB_TYPE,vendored_openssl"
 
-    perl -i -pe 'print "# Install build dependencies for vendored OpenSSL\nRUN apt-get update && apt-get install -y --no-install-recommends make perl && rm -rf /var/lib/apt/lists/*\n\n" if /^RUN source \/env-cargo && \\$/ && !$done++' "$DIR/Dockerfile"
+    perl -i -pe 'print "# Install build dependencies for vendored OpenSSL\nRUN apt-get update && apt-get install -y --no-install-recommends make perl && rm -rf /var/lib/apt/lists/*\n\n" if /^RUN \. \/env-cargo && \\$/ && !$done++' "$DIR/Dockerfile"
 fi
 echo "[INFO] docker buildx -t vaultwarden-deb $DIR --build-arg DB=$CARGO_FEATURES"
 docker buildx build -t vaultwarden-deb "$SRC" --build-arg DB="$CARGO_FEATURES" --target dpkg -f "$DIR/Dockerfile"
