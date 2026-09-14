@@ -120,6 +120,34 @@ exit
 sed -i "s/\(rust:[0-9.]*-slim-\)[a-z]*/\1${OS_VERSION_NAME}/g" "$DIR/Dockerfile"
 sed -i "s/\(debian:\)[a-z]*-slim/\1${OS_VERSION_NAME}-slim/g" "$DIR/Dockerfile"
 
+if [ "$OS_VERSION_NAME" = "bullseye" ]; then
+    # Pin to the newest published -slim-bullseye rust tag (bullseye is EOL upstream)
+    LATEST_BULLSEYE_RUST=$(curl -s "https://registry.hub.docker.com/v2/repositories/library/rust/tags?page_size=300&name=slim-bullseye" \
+        | grep -oP '"name":\s*"\K[0-9]+\.[0-9]+\.[0-9]+-slim-bullseye' \
+        | sed 's/-slim-bullseye$//' \
+        | sort -V | tail -1)
+    if [ -n "$LATEST_BULLSEYE_RUST" ]; then
+        echo "[INFO] bullseye rust image is frozen upstream - pinning build toolchain to rust $LATEST_BULLSEYE_RUST"
+        sed -i "s/rust:[0-9.]*-slim-bullseye/rust:${LATEST_BULLSEYE_RUST}-slim-bullseye/" "$DIR/Dockerfile"
+    else
+        echo "[WARN] could not determine a published bullseye rust tag; build may fail" >&2
+    fi
+
+    # Repoint apt at archive.debian.org/snapshot.debian.org (deb.debian.org dropped bullseye-security)
+    SOURCES_SNIPPET="$DIR/.bullseye-sources.dockerfile-snippet"
+    cat > "$SOURCES_SNIPPET" <<'EOF'
+RUN set -eux; \
+    echo 'deb http://archive.debian.org/debian bullseye main contrib non-free' > /etc/apt/sources.list; \
+    echo 'deb http://archive.debian.org/debian bullseye-updates main contrib non-free' >> /etc/apt/sources.list; \
+    echo 'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260830T000000Z bullseye-security main contrib non-free' >> /etc/apt/sources.list
+EOF
+    sed -i "/^COPY --from=xx \/ \/\$/r $SOURCES_SNIPPET" "$DIR/Dockerfile"
+    rm -f "$SOURCES_SNIPPET"
+
+    # Request libgcc-10-dev directly (xx-c-essentials misdetects gcc-12 on bullseye)
+    sed -i "s/xx-c-essentials/libc6-dev libgcc-10-dev/" "$DIR/Dockerfile"
+fi
+
 # Prepare Controlfile
 CONTROL="$DEBIANDIR/control"
 cp "$DIR/control.dist" "$CONTROL"
